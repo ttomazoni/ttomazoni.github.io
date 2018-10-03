@@ -1,0 +1,136 @@
+<!doctype html>
+<html>
+<head>
+    
+    <title>Twipin</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/all.js" integrity="sha384-xymdQtn1n3lH2wcu0qhcdaOpQwyoarkgLVxC/wZ5q7h9gHtxICrpcaSUfygqZGOe" crossorigin="anonymous"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+</head>
+<body>
+    
+    <div class="container">
+        <div class="row justify-content-center pt-3 pt-sm-5" >
+            <div class="col-md-6">
+               <div class="card bg-light">
+                  <div class="card-body">
+                     <h4 class="card-title"> Twipin </h4>
+                     <textarea id="mensagem" class="form-control mb-2" rows="3" placeholder="O que você quer twipar?" maxlength="140" autofocus></textarea> 
+                     <span id="caracteres" class="badge badge-pill badge-secondary"> 140 caracteres restando </span>
+                     <button id="btnEnviar" class="btn btn-primary float-right" disabled>Twipar</button>
+                  </div>
+               </div>
+            </div>
+        </div>
+    </div>
+    <a id="mostrarlikes" href="#"><b>Seja o primeiro a publicar</b></a>
+    <div id="feed">
+       
+    </div> <!-- Fecha Feed -->
+
+    <div id="Twit" class="invisible" >   <!-- Começa aquiiiiiiiiiiiiiiiiiiiii -->
+        <div class="row justify-content-center pt-3 pt-sm-5 remover" > 
+            <div class="col-md-6">
+               <div class="card bg-light">
+                  <div class="card-body ">
+                     <b>DTG</b><i>@Twipin<i>
+                     <p>asjhdfgas</p>
+		     <br>
+
+                     <a class="curtir" href="#"><i class="fas fa-heart" ></i> <span class="coracao">0</span> </a>
+                     <a class="descurtir" href="#"><i class="far fa-thumbs-down"></i><span class="deslike">0</span> </a>
+                     <a class="delete" href="#"><i class="fas fa-trash float-right"></i> <span class="deletar"></span></a>
+                  </div>
+               </div>
+            </div>
+        </div>
+    </div> <!-- Termina aquiiiiiiiiiiiiiiiiiiiii -->
+
+    <script>
+       
+
+
+       var todosTwips = {
+           lista: [
+               {usuario: "joao", nome:"João Sobrenome Inventado", mensagem:"Buenas"},  
+               {usuario: "mauro", nome:"Mauro George", mensagem:"noite"},   
+               {usuario: "riquelmi", nome:"stan", mensagem:"tarde"} 
+           ]
+       };
+
+       //twip.usuario
+
+
+       $(document).ready(function() {
+
+            //Atualização dos caracteres restantes e botão
+            $("#mensagem").on('input',function() {
+                 var t = $(this).val();
+                 var max = $(this).attr("maxlength");
+                 var c = max - t.length;
+                 $("#caracteres").text(c + " caracteres restando"); 
+                 if (c == max) {
+                     $("#btnEnviar").prop("disabled", true); 
+                 } else {
+                     $("#btnEnviar").prop("disabled", false);}
+            });
+
+            //Envio de mensagem (botao enviar)
+	    //"find" localiza o elemento 
+            $("#btnEnviar").on('click', function() {
+                 var t = $("#mensagem").val();
+                 $("#mensagem").val("").trigger("input").focus();
+                 var nova = $("#Twit > div").clone(true);
+		 nova.find("p").text(t);
+		 nova.find(".coracao").text();
+		 nova.find(".deslike").text();
+		 nova.appendTo("#feed");
+		 carregarTwips();
+		 atualizarquantidade();
+            });
+	    
+
+   //click dos links
+	    $("#Twit a.curtir").on('click', function(){     //pega a link virjão para o like (find pesquisa dentro do parametro)
+		var c = $(this).find(".coracao").text();    //pesquisa dentro do proprio link o valor da classe coração
+		$(this).find(".coracao").text(++c);           //reescreve o valor incrementado pegando o valor do find
+	    });
+            $("#Twit a.descurtir").on('click', function(){     //pega a link virjão para o like
+		var v = $(this).find(".deslike").text();    //pesquisa dentro do proprio link o valor da classe coração
+		$(this).find(".deslike").text(++v);           //reescreve o valor incrementado pegando o valor do find
+	    }); 
+
+	    $("#Twit a.delete").on('click', function(){     //pega a link virjão para o like
+		$(this).closest(".remover").remove();         //closest procura o que tem fora do this
+		atualizarquantidade();
+	    }); 
+
+            carregarTwips();                                //chama o bagulho
+        });
+
+        function carregarTwips(){       //carregar todos os twips
+             var contagem = todosTwips.lista.length;          //quantos itens tem na lista
+	     for (var i = 0; i < contagem; i++){              //laço de repediçao contagem 
+                 var t = todosTwips.lista[i];                 //armazena em t cada item da lista na posição i
+                 var nova = $("#Twit > div").clone(true);     //clona o gabarito
+		 nova.find("p").text(t.mensagem);             //"p" é o local onde será impresso na posição t.mensagem
+		 nova.find(".coracao").text();
+		 nova.find(".deslike").text();
+		 nova.appendTo("#feed");
+		 atualizarquantidade();  
+             }
+        };
+
+
+	//contagem de posts
+	function atualizarquantidade() {
+	    var n = $("#feed .row").length;
+	    $("#mostrarlikes").text(n + " twip(s) adicionado(s)");
+	};
+ 
+    </script>
+</body>
+</html>
+
